@@ -1,0 +1,29 @@
+---
+title: "TP4"
+output: html_document
+date: "2025-10-25"
+Auteur : Zara Zulfiqar
+Groupe : M1 MLSD FA
+---
+
+
+```{r}
+install.packages("Factoshiny")
+install.packages("readr") 
+library(Factoshiny)
+library(readr)
+```
+
+
+```{r}
+# Installation des packages 
+
+data <- read.csv("C:/Users/zara_/Downloads/Life-Expectancy-Data-Averaged.csv")
+
+```
+
+```{r}
+# 3. Lancer Factoshiny pour faire l'ACP uniquement sur les variables quantitatives
+PCAshiny(data)
+```
+

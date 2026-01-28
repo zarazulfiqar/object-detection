@@ -1,0 +1,125 @@
+---
+title: "TP 2 / 3"
+output: html_document
+date: "2025-10-22"
+---
+```{r}
+# Installation des packages 
+
+install.packages(c("FactoMineR", "factoextra"))
+library(FactoMineR)
+library(factoextra)
+```
+
+
+```{r}
+# I - Préparation et Exploration 
+
+# Export 
+data(decathlon)
+
+# Structure
+str(decathlon)
+summary(decathlon)
+
+```
+Interprétation Summary : 
+
+L’ensemble des mesures décrit un groupe d’athlètes de décathlon de niveau international, avec des valeurs centrales élevées et des dispersions limitées. Sur les épreuves de course, les temps se situent typiquement autour de 11 s au 100 m, 50 s au 400 m, 14,6 s aux haies et environ 4 min 40 au 1500 m, ce qui reflète une vitesse soutenue tout en conservant une endurance correcte en fin de programme. Dans les sauts, la longueur médiane de 7,30 m et la hauteur proche de 1,95–2,00 m témoignent d’excellentes qualités explosives, complétées par un niveau solide à la perche avec une médiane à 4,80 m. Les lancers sont également homogènes, avec environ 14,5 m au poids, 44 m au disque et 58 m au javelot, ce qui confirme un profil complet sans faiblesse marquée dans les gestes de force. Les médianes sont très proches des moyennes pour l’ensemble des variables, ce qui suggère peu d’outliers ou de distributions distordues. Enfin, les totaux de points s’agrègent autour de 8000, avec des extrêmes allant de 7300 à près de 8900 points, et des rangs entre 1 et 28 provenant essentiellement de deux compétitions majeures (Décastar et Jeux olympiques), ce qui consacre la qualité et la comparabilité de ce panel d’élite.
+
+Les unités mesurées sont : 
+- 100m : temps sur 100m (en s)
+- Long.jump : distance au saut en longueur (en m)
+- Shot.put : distance au lancer
+- High.jump : hauteur au saut
+- 400m : temps sur 400 mètres (en s)
+- 110m.hurdle : temps sur 110 mètres (en s)
+- Discus : distance au lancer de disque (en m)
+- Pole.vault : hauteur au saut (en m)
+- Javeline : distance au lancer du javelot (en m)
+- 1500m : temps sur 1500m (en s)
+- index des colonnes : correspond au nom de l’athlète
+
+
+```{r}
+# II - Réaliser une ACP 
+
+# ACP uniquement sur les 10 épreuves
+res.pca <- PCA(decathlon, quanti.sup = 11:12, quali.sup = 13)
+
+# Analyse graphique et Interprétation
+fviz_eig(res.pca, addlabels = TRUE, ylim = c(0, 50))
+```
+
+# Analyse premier graphique :
+Ce graphique montre la part de la variance expliquée par chaque axe principal.
+
+Dim1 explique autour de 32-33% de la variance, Dim2 entre 17-18% et Dim3 environ 14%, ainsi les deux premiers axes expliquent près de la moitié de la variabilité totale, donc visualiser les individus selon ces deux axes donne une vue d’ensemble fidèle.
+
+En général, on retient les axes avant le « coude » (là où la pente du graph diminue fort), ici se situe autour du 2ème ou 3ème axe.
+
+```{r}
+fviz_pca_var(res.pca, col.var = "contrib")
+```
+
+# Analyse cercle de corrélation :
+
+Dans ce graphique, appelé cercle des corrélations, chaque variable est représentée par une flèche partant de l'origine. Plus la flèche est longue et colorée, plus la variable contribue à la formation des deux axes principaux: ce sont donc celles qui sont le plus intéressantes à interpréter. Les variables proches du bord du cercle sont bien représentées par ce plan, tandis que les variables plus courtes (près du centre) sont peu corrélées aux axes et donc moins informatives sur ce plan.
+
+De plus, les variables proches les unes des autres sont positivement corrélées. Dans notre cas les variables Javeline, High Jump, Discus et Shot.put sont fortement positivement corrélées, cela veut dire qu'un athlèthe bon dans une de ces disciplines est généralement bon dans les autres disciplines citées.
+Également les variables 110m hurdle, 100m et rank sont correlées positivement.
+
+A l'inverse les variables en opposition (angle d’environ 180) sont négativement corrélées. Par exemple, '400m' est dans la direction opposée de "Long.jump", de même pour Rank et Point. Ce qui signifie qu'un athlèthe avec un score ou une performance basse dans une des disciplines sera généralement fort dans la discipline à l'opposé dans le cercle.
+
+Enfin on voit que les disciplines comme 100m n'a aucune corrélation avec High.jump, car on voit un angle entre les deux flèches de 90 degré.
+
+Pour finir il est possible de lire ce graphique completé avec le graphique des individus en projetant les athlètes et les variables, on peut lire que les athlètes placés proche de la flèche d’une variable sont performants dans cette discipline. ( cf 3ème et 4ème graphique biplot)
+
+**interprétation deux premiers axes :**
+
+L’axe 1 différencie principalement les épreuves de type « puissance/technique » et le saut en longueur, des épreuves où le temps (rapide ou long) prédomine. Sur cet axe, plus un athlète est à droite, plus il totalise de points et occupe un bon classement, ce qui en fait un indicateur global de la performance générale.
+
+L’axe 2 met en avant l’opposition entre les épreuves d’endurance et de vitesse moyenne (comme le 1500m et le 400m situés en haut), et celles liées à la force et aux lancers (Discus, Shot.put placés en bas). Il exprime le compromis entre un profil orienté « endurance/vitesse » et un profil « puissance », comme on peut le lire sur le cercle des corrélations adapté au décathlon.
+
+**Analyse des grands groupes visibles dans le cercle de corrélation :**
+
+Le cercle de corrélation montre distinctement des groupes:
+
+Un groupe "lancers": "Discus", "Shot.put", "Javeline", proches les uns des autres et bien corrélés.
+Un groupe "sauts": "Long.jump", "High.jump", "Pole vault", également très proches et corrélés.
+Un groupe "vitesse/haies": "100m", "400m", "110m hurdle".
+"1500m" forme une catégorie à part, liée à l’endurance et donc faiblement corrélée aux autres disciplines de vitesse et de puissance.
+
+
+#### TP 3
+
+```{r}
+fviz_pca_ind(res.pca, col.ind = "cos2", gradient.cols =  c("#00AFBB","#E7B800","#FC4E07"))
+```
+# Analyse troisième graphique 
+
+Dans ce graphique chaque point représente un athlète, ainsi pour commencer les athlètes proches sur le plot ont des profils de performance similaires, par exemple Clay et Serble ont des résultats similaires.
+
+De plus ceux situés loin du centre (origine) présentent des profils "atypiques" ou très marqués sur certains critères, ici Karpov, Sebrle, Casarca ou Drews ont des profils atypiques comparé aux restes des joueurs.
+
+Egalement, plus la couleur est vive, mieux l’athlète est représenté sur ces deux axes.
+Enfin, comme nous l'avons dis, il est possible d'analyser les individus avec le cercle des corrélations. POur cela, les individus placées au même endroit que les flèches dans le cercle des corrélations, sont des individus qui excellent dans cette discipline0. 
+
+Par exemple, on peut repérer des athlètes forts sur toutes disciplines, comme d'autres qui se démarquent grâce à certaines épreuves comme Casarca sur le 400m, car il a un nombre de seconde elevé sur le 400m (ici mauvaise performance mais ils se démarquent quand meme)
+
+La distribution des athlètes le long du premier axe (Dim 1) illustre l’opposition entre des profils "explosivité/sauts/vitesse" et "force/lancers". 
+Les athlètes positionnés à droite sont plutôt performants dans les épreuves de lancers et peut-être certains sauts, alors que ceux placés à gauche se distinguent dans les courses de sprint ou les haies. Le second axe (Dim 2) permet quant à lui d’isoler les profils endurants ou ceux qui présentent un certain déséquilibre dans leurs aptitudes, avec par exemple des scores élevés au 1500m ou au contraire un profil sprint pur sans endurance. 
+Cela donne une vision synthétique des différences de profils athlétiques à partir de résultats multivariés.
+
+
+
+
+
+
+
+
+
+
+
+
+
